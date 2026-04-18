@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.ic3dwtf.pingnametag.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "EntityRendererMixin",
+    "EntityRenderStateAccessor",
+    "TextDisplayEntityRenderStateAccessor",
+    "TextDisplayEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

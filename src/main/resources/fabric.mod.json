@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "ping-nametag",
+  "version": "${version}",
+  "name": "Ping Nametag",
+  "description": "Displays player ping directly in nametags with configurable colors.",
+  "authors": [
+    "ic3dwtf"
+  ],
+  "contact": {
+    "sources": "https://github.com/ic3dwtf/ping-nametag"
+  },
+  "license": "MIT",
+  "icon": "assets/ping-nametag/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.ic3dwtf.pingnametag.PingNametagClient"
+    ],
+    "modmenu": [
+      "com.ic3dwtf.pingnametag.PingNametagModMenu"
+    ]
+  },
+  "mixins": [
+    "ping-nametag.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}",
+    "fabric-api": "*",
+    "cloth-config2": ">=${cloth_config_version}"
+  },
+  "suggests": {
+    "modmenu": ">=${modmenu_version}"
+  }
+}
