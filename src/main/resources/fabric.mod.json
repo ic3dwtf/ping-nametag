@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "ping-nametag",
   "version": "${version}",
-  "name": "Ping Nametag",
-  "description": "Displays player ping directly in nametags with configurable colors.",
+  "name": "NametagPing",
+  "description": "Displays player ping directly in nametags.",
   "authors": [
     "ic3dwtf"
   ],
   "contact": {
-    "sources": "https://github.com/ic3dwtf/ping-nametag"
+    "sources": "https://github.com/ic3dwtf/nametag-ping"
   },
   "license": "MIT",
   "icon": "assets/ping-nametag/icon.png",

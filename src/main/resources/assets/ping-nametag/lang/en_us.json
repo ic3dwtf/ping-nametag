@@ -1,5 +1,5 @@
 {
-  "ping_nametag.config.title": "Ping Nametag",
+  "ping_nametag.config.title": "NametagPing",
   "ping_nametag.config.category.general": "General",
   "ping_nametag.config.enabled": "Enable ping overlay",
   "ping_nametag.config.show_own_ping": "Show your own ping",
