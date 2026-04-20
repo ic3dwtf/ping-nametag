@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
@@ -54,28 +55,53 @@ public abstract class TextDisplayEntityRendererMixin {
                 return;
             }
 
-            Entity vehicle = entity.getVehicle();
-            if (!(vehicle instanceof PlayerEntity player)) {
-                return;
-            }
-            playerMounted = true;
-
-            if (!config.showOwnPing && player.getUuid().equals(client.player.getUuid())) {
-                return;
-            }
-
             Text baseText = entity.getText();
             String baseTextValue = baseText == null ? "" : baseText.getString();
             if (baseTextValue.isEmpty()) {
                 return;
             }
 
+            // Determine the first line of the text for player-name matching.
             int firstNewline = baseTextValue.indexOf('\n');
-            if (firstNewline < 0 && !baseTextValue.contains(player.getNameForScoreboard())) {
-                return;
+            String firstLine = firstNewline >= 0 ? baseTextValue.substring(0, firstNewline) : baseTextValue;
+
+            // Resolve which player this TextDisplay belongs to.
+            // Primary: the entity is a passenger of a player (vehicle-mounted nametag).
+            // Fallback: the entity is not mounted, so scan the tab-list for a player whose
+            //           scoreboard name appears in the first line of the text.  This covers
+            //           server-side nametag plugins that reposition the display each tick
+            //           without using the passenger/vehicle system.
+            PlayerListEntry entry = null;
+            Entity vehicle = entity.getVehicle();
+            if (vehicle instanceof PlayerEntity vehiclePlayer) {
+                // Only process if the text is actually related to this player.
+                if (firstNewline < 0 && !firstLine.contains(vehiclePlayer.getNameForScoreboard())) {
+                    return;
+                }
+                if (!config.showOwnPing && vehiclePlayer.getUuid().equals(client.player.getUuid())) {
+                    return;
+                }
+                entry = client.getNetworkHandler().getPlayerListEntry(vehiclePlayer.getUuid());
+                playerMounted = true;
+            } else {
+                // Non-mounted: find a tab-list entry whose name is present in the first line.
+                if (!firstLine.isEmpty()) {
+                    for (PlayerListEntry candidate : client.getNetworkHandler().getPlayerList()) {
+                        String name = candidate.getProfile().name();
+                        if (name != null && !name.isEmpty() && firstLine.contains(name)) {
+                            if (!config.showOwnPing && candidate.getProfile().id().equals(client.player.getUuid())) {
+                                return;
+                            }
+                            entry = candidate;
+                            break;
+                        }
+                    }
+                }
+                if (entry == null) {
+                    return;
+                }
             }
 
-            PlayerListEntry entry = client.getNetworkHandler().getPlayerListEntry(player.getUuid());
             MutableText suffix;
             if (entry == null) {
                 suffix = Text.literal(" (??ms)").setStyle(Style.EMPTY.withColor(0xAAAAAA));
@@ -93,18 +119,57 @@ public abstract class TextDisplayEntityRendererMixin {
     }
 
     private static Text ping_nametag$appendSuffixToTopLine(Text baseText, MutableText suffix) {
-        String baseTextValue = baseText.getString();
-        int firstNewline = baseTextValue.indexOf('\n');
-        if (firstNewline < 0) {
+        if (!baseText.getString().contains("\n")) {
             return baseText.copy().append(suffix);
         }
+        // Insert suffix before the first '\n' while preserving all rich-text formatting.
+        boolean[] inserted = {false};
+        return ping_nametag$buildWithSuffixInserted(baseText, suffix, inserted);
+    }
 
-        String firstLine = baseTextValue.substring(0, firstNewline);
-        String remainingLines = baseTextValue.substring(firstNewline);
-        return Text.literal(firstLine)
-                .setStyle(baseText.getStyle())
-                .append(suffix)
-                .append(Text.literal(remainingLines).setStyle(baseText.getStyle()));
+    /**
+     * Recursively rebuilds {@code node} and its siblings, inserting {@code suffix}
+     * immediately before the first '\n' character found anywhere in the tree.
+     * All existing node styles and the sibling structure are preserved.
+     */
+    private static MutableText ping_nametag$buildWithSuffixInserted(Text node, MutableText suffix, boolean[] inserted) {
+        String ownStr = ping_nametag$ownLiteralString(node);
+        MutableText result;
+
+        if (!inserted[0] && ownStr.contains("\n")) {
+            // Split this literal node at its first newline and inject the suffix in between.
+            int nl = ownStr.indexOf('\n');
+            result = Text.literal(ownStr.substring(0, nl)).setStyle(node.getStyle());
+            result.append(suffix);
+            result.append(Text.literal(ownStr.substring(nl)).setStyle(node.getStyle()));
+            inserted[0] = true;
+            for (Text sibling : node.getSiblings()) {
+                result.append(sibling);
+            }
+        } else {
+            result = MutableText.of(node.getContent()).setStyle(node.getStyle());
+            for (Text sibling : node.getSiblings()) {
+                if (inserted[0]) {
+                    result.append(sibling);
+                } else {
+                    result.append(ping_nametag$buildWithSuffixInserted(sibling, suffix, inserted));
+                }
+            }
+            // Fallback: no '\n' found anywhere in this subtree – append at the end.
+            if (!inserted[0]) {
+                result.append(suffix);
+                inserted[0] = true;
+            }
+        }
+        return result;
+    }
+
+    /** Returns the literal string content of {@code node}'s own root (not its siblings). */
+    private static String ping_nametag$ownLiteralString(Text node) {
+        if (node.getContent() instanceof PlainTextContent.Literal literal) {
+            return literal.string();
+        }
+        return "";
     }
 
     private static void ping_nametag$recordPerf(PingNametagConfig config, long startNanos, boolean playerMounted, boolean pingApplied) {
