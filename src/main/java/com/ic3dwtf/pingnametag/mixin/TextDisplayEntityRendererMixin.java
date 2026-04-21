@@ -61,20 +61,12 @@ public abstract class TextDisplayEntityRendererMixin {
                 return;
             }
 
-            // Determine the first line of the text for player-name matching.
             int firstNewline = baseTextValue.indexOf('\n');
             String firstLine = firstNewline >= 0 ? baseTextValue.substring(0, firstNewline) : baseTextValue;
 
-            // Resolve which player this TextDisplay belongs to.
-            // Primary: the entity is a passenger of a player (vehicle-mounted nametag).
-            // Fallback: the entity is not mounted, so scan the tab-list for a player whose
-            //           scoreboard name appears in the first line of the text.  This covers
-            //           server-side nametag plugins that reposition the display each tick
-            //           without using the passenger/vehicle system.
             PlayerListEntry entry = null;
             Entity vehicle = entity.getVehicle();
             if (vehicle instanceof PlayerEntity vehiclePlayer) {
-                // Only process if the text is actually related to this player.
                 if (firstNewline < 0 && !firstLine.contains(vehiclePlayer.getNameForScoreboard())) {
                     return;
                 }
@@ -84,7 +76,6 @@ public abstract class TextDisplayEntityRendererMixin {
                 entry = client.getNetworkHandler().getPlayerListEntry(vehiclePlayer.getUuid());
                 playerMounted = true;
             } else {
-                // Non-mounted: find a tab-list entry whose name is present in the first line.
                 if (!firstLine.isEmpty()) {
                     for (PlayerListEntry candidate : client.getNetworkHandler().getPlayerList()) {
                         String name = candidate.getProfile().name();
@@ -122,22 +113,16 @@ public abstract class TextDisplayEntityRendererMixin {
         if (!baseText.getString().contains("\n")) {
             return baseText.copy().append(suffix);
         }
-        // Insert suffix before the first '\n' while preserving all rich-text formatting.
         boolean[] inserted = {false};
         return ping_nametag$buildWithSuffixInserted(baseText, suffix, inserted);
     }
 
-    /**
-     * Recursively rebuilds {@code node} and its siblings, inserting {@code suffix}
-     * immediately before the first '\n' character found anywhere in the tree.
-     * All existing node styles and the sibling structure are preserved.
-     */
+
     private static MutableText ping_nametag$buildWithSuffixInserted(Text node, MutableText suffix, boolean[] inserted) {
         String ownStr = ping_nametag$ownLiteralString(node);
         MutableText result;
 
         if (!inserted[0] && ownStr.contains("\n")) {
-            // Split this literal node at its first newline and inject the suffix in between.
             int nl = ownStr.indexOf('\n');
             result = Text.literal(ownStr.substring(0, nl)).setStyle(node.getStyle());
             result.append(suffix);
@@ -155,7 +140,6 @@ public abstract class TextDisplayEntityRendererMixin {
                     result.append(ping_nametag$buildWithSuffixInserted(sibling, suffix, inserted));
                 }
             }
-            // Fallback: no '\n' found anywhere in this subtree – append at the end.
             if (!inserted[0]) {
                 result.append(suffix);
                 inserted[0] = true;
@@ -164,7 +148,6 @@ public abstract class TextDisplayEntityRendererMixin {
         return result;
     }
 
-    /** Returns the literal string content of {@code node}'s own root (not its siblings). */
     private static String ping_nametag$ownLiteralString(Text node) {
         if (node.getContent() instanceof PlainTextContent.Literal literal) {
             return literal.string();
