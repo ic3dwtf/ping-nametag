@@ -13,7 +13,7 @@ import java.nio.file.Path;
 
 public final class PingNametagConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("ping-nametag.json");
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("nametag-ping.json");
 
     private static PingNametagConfig config = new PingNametagConfig();
 

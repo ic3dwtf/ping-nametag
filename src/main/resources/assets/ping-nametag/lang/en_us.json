@@ -3,12 +3,12 @@
   "ping_nametag.config.category.general": "General",
   "ping_nametag.config.enabled": "Enable ping overlay",
   "ping_nametag.config.show_own_ping": "Show your own ping",
-  "ping_nametag.config.debug_logging": "Enable debug logging",
   "ping_nametag.config.good_ping_max": "Good ping max",
   "ping_nametag.config.medium_ping_max": "Medium ping max",
   "ping_nametag.config.bad_ping_max": "Bad ping max",
   "ping_nametag.config.good_color": "Good ping color",
   "ping_nametag.config.medium_color": "Medium ping color",
   "ping_nametag.config.bad_color": "Bad ping color",
-  "ping_nametag.config.worst_color": "Worst ping color"
+  "ping_nametag.config.worst_color": "Worst ping color",
+  "key.category.pingnametags.keycategory": "Nametag Ping"
 }

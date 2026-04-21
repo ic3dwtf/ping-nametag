@@ -31,11 +31,6 @@ public final class PingNametagModMenu implements ModMenuApi {
                     .setSaveConsumer(value -> config.showOwnPing = value)
                     .build());
 
-            general.addEntry(entries.startBooleanToggle(Text.translatable("ping_nametag.config.debug_logging"), config.debugLogging)
-                    .setDefaultValue(false)
-                    .setSaveConsumer(value -> config.debugLogging = value)
-                    .build());
-
             general.addEntry(entries.startIntField(Text.translatable("ping_nametag.config.good_ping_max"), config.goodPingMax)
                     .setDefaultValue(80)
                     .setMin(1)

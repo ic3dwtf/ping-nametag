@@ -16,7 +16,6 @@ public final class PingNametagConfig {
         PingNametagConfig copy = new PingNametagConfig();
         copy.enabled = this.enabled;
         copy.showOwnPing = this.showOwnPing;
-        copy.debugLogging = this.debugLogging;
         copy.goodPingMax = this.goodPingMax;
         copy.mediumPingMax = this.mediumPingMax;
         copy.badPingMax = this.badPingMax;
