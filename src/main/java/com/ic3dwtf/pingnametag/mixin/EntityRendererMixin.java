@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.regex.*;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin {
@@ -47,7 +48,8 @@ public abstract class EntityRendererMixin {
 
         PlayerListEntry entry = client.getNetworkHandler().getPlayerListEntry(self.getUuid());
         if (entry == null) {
-            MutableText unknownSuffix = Text.literal(" (??ms)").setStyle(Style.EMPTY.withColor(0xAAAAAA));
+            String textFormat = config.textFormat.replaceAll("%ping%", Matcher.quoteReplacement("??"));
+            MutableText unknownSuffix = Text.literal(textFormat).setStyle(Style.EMPTY.withColor(0xAAAAAA));
             ((EntityRenderStateAccessor) state).ping_nametag$setDisplayName(
                     ping_nametag$baseLabelWithoutPingSuffix(originalText).append(unknownSuffix)
             );
@@ -55,7 +57,8 @@ public abstract class EntityRendererMixin {
         }
 
         int latency = Math.max(0, entry.getLatency());
-        MutableText suffix = Text.literal(" (" + latency + "ms)")
+        String textFormat = config.textFormat.replaceAll("%ping%", Matcher.quoteReplacement(String.valueOf(latency)));
+        MutableText suffix = Text.literal(textFormat)
                 .setStyle(Style.EMPTY.withColor(config.colorForPing(latency)));
 
         ((EntityRenderStateAccessor) state).ping_nametag$setDisplayName(

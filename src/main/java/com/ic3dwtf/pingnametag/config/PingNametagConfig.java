@@ -2,6 +2,7 @@ package com.ic3dwtf.pingnametag.config;
 
 public final class PingNametagConfig {
     public boolean enabled = true;
+    public String textFormat = " (%ping%ms)";
     public boolean showOwnPing = true;
     public boolean debugLogging = false;
     public int goodPingMax = 80;
@@ -16,6 +17,7 @@ public final class PingNametagConfig {
         PingNametagConfig copy = new PingNametagConfig();
         copy.enabled = this.enabled;
         copy.showOwnPing = this.showOwnPing;
+        copy.textFormat = this.textFormat;
         copy.goodPingMax = this.goodPingMax;
         copy.mediumPingMax = this.mediumPingMax;
         copy.badPingMax = this.badPingMax;

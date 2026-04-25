@@ -26,6 +26,12 @@ public final class PingNametagModMenu implements ModMenuApi {
                     .setSaveConsumer(value -> config.enabled = value)
                     .build());
 
+            general.addEntry(entries.startStrField(Text.translatable("ping_nametag.config.text_format"), config.textFormat)
+                    .setDefaultValue(" (%ping%ms)")
+                    .setTooltip(Text.translatable("ping_nametag.tooltip.text_format"))
+                    .setSaveConsumer(value -> config.textFormat = value)
+                    .build());
+
             general.addEntry(entries.startBooleanToggle(Text.translatable("ping_nametag.config.show_own_ping"), config.showOwnPing)
                     .setDefaultValue(true)
                     .setSaveConsumer(value -> config.showOwnPing = value)

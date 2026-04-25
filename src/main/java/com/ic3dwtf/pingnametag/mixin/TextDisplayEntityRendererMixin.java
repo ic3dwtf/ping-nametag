@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.regex.*;
 
 @Mixin(DisplayEntityRenderer.TextDisplayEntityRenderer.class)
 public abstract class TextDisplayEntityRendererMixin {
@@ -80,10 +81,14 @@ public abstract class TextDisplayEntityRendererMixin {
 
         MutableText suffix;
         if (entry == null) {
-            suffix = Text.literal(" (??ms)").setStyle(Style.EMPTY.withColor(0xAAAAAA));
+            String textFormat = config.textFormat.replaceAll("%ping%", Matcher.quoteReplacement("??"));
+
+            suffix = Text.literal(textFormat).setStyle(Style.EMPTY.withColor(0xAAAAAA));
         } else {
             int latency = Math.max(0, entry.getLatency());
-            suffix = Text.literal(" (" + latency + "ms)").setStyle(Style.EMPTY.withColor(config.colorForPing(latency)));
+            String textFormat = config.textFormat.replaceAll("%ping%", Matcher.quoteReplacement(String.valueOf(latency)));
+
+            suffix = Text.literal(textFormat).setStyle(Style.EMPTY.withColor(config.colorForPing(latency)));
         }
 
         Text modifiedText = ping_nametag$appendSuffixToTopLine(baseText, suffix);
